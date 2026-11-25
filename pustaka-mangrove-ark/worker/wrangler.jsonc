@@ -1,0 +1,16 @@
+{
+  "name": "pustaka-mangrove-ark",
+  "main": "src/index.js",
+  "compatibility_date": "2026-11-01",
+  "assets": { "directory": "./public" },
+  "ai": { "binding": "AI" },
+  "vars": {
+    "SUPABASE_URL": "https://mbrthjiagigyqkftwsiy.supabase.co",
+    "SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1icnRoamlhZ2lneXFrZnR3c2l5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTU1OTg0MDMsImV4cCI6MjExMTE3NDQwM30.ISC4N1Xebzu2qnpLceV2RaOXD1gw8eNGF2joMjlL4Hc",
+    "AI_ENABLED": "1",
+    "AI_MODEL": "@cf/meta/llama-3.1-8b-instruct"
+  }
+  // Rahasia (jangan ditulis di sini), simpan lewat dashboard Cloudflare > Settings > Variables and Secrets:
+  //   SUPABASE_SERVICE_KEY  (untuk mencatat ask_log)
+  //   TURNSTILE_SECRET      (opsional, setelah Turnstile dipasang)
+}
