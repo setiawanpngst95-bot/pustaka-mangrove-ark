@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pustaka Mangrove ARK</title>
+<style>
+:root{--forest:#174B34;--soft:#EAF2EB;--bg:#F8FAF8;--border:#E2E8E3;--text:#172B21;--sec:#64746A;--ctl:#8B968F}
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--text);font-size:16px;line-height:1.55}
+header{background:#fff;border-bottom:1px solid var(--border);padding:16px}
+.brand{font-weight:600;letter-spacing:.14em;color:var(--forest)}
+.brand small{display:block;font-size:12px;letter-spacing:.1em;color:var(--sec)}
+main{max-width:860px;margin:0 auto;padding:24px 16px 48px}
+h1{font-size:28px;line-height:1.2;margin:0 0 8px;font-weight:600;color:var(--forest)}
+.tabs{display:flex;gap:8px;margin:24px 0 16px}
+.tabs button{min-height:44px;padding:0 18px;border:1px solid var(--ctl);border-radius:22px;background:#fff;font:inherit;font-size:14px;cursor:pointer}
+.tabs button[aria-pressed=true]{background:var(--forest);color:#fff;border-color:var(--forest);font-weight:600}
+label{display:block;font-size:14px;font-weight:600;margin-bottom:8px}
+.row{display:flex;flex-wrap:wrap;gap:8px}
+input[type=text]{flex:1 1 240px;min-width:0;height:48px;padding:0 12px;border:1px solid var(--ctl);border-radius:8px;font:inherit}
+.go{min-height:48px;padding:0 24px;border:0;border-radius:8px;background:var(--forest);color:#fff;font:inherit;font-size:14px;font-weight:600;cursor:pointer}
+:focus-visible{outline:2px solid #286247;outline-offset:2px}
+.opts{margin-top:8px;font-size:14px;color:var(--sec)}
+.opts label{display:inline-flex;align-items:center;gap:8px;font-weight:400;margin:0;min-height:44px}
+.list{margin-top:24px;background:#fff;border:1px solid var(--border);border-radius:12px}
+.item{padding:16px;border-bottom:1px solid var(--border)}
+.item:last-child{border-bottom:0}
+.item h3{margin:0;font-size:16px;font-weight:600;line-height:1.4}
+.meta{font-size:14px;color:var(--sec);margin-top:4px}
+.oa{font-size:14px;font-weight:600;color:#286247}
+.ans{margin-top:24px;padding:16px;background:#fff;border:1px solid var(--border);border-radius:12px}
+.note{font-size:12px;color:var(--sec);margin-top:8px}
+.empty{padding:24px 16px}
+a{color:#286247}
+[hidden]{display:none}
+</style>
+</head>
+<body>
+<header><div class="brand">ARK<small>PUSTAKA MANGROVE</small></div></header>
+<main>
+<h1>Temukan literatur pesisir</h1>
+<p style="color:var(--sec);margin:0">Jurnal, buku, dan laporan tentang mangrove, terumbu karang, dan pesisir.</p>
+<div class="tabs" role="group" aria-label="Mode">
+<button id="tCari" aria-pressed="true">Cari literatur</button>
+<button id="tTanya" aria-pressed="false">Tanya asisten</button>
+</div>
+
+<form id="fCari">
+<label for="q">Kata kunci</label>
+<div class="row"><input id="q" type="text" placeholder="Contoh: stok karbon mangrove"><button class="go" type="submit">Cari</button></div>
+<div class="opts"><label><input type="checkbox" id="oa"> Hanya akses terbuka</label></div>
+</form>
+
+<form id="fTanya" hidden>
+<label for="t">Pertanyaan Anda</label>
+<div class="row"><input id="t" type="text" placeholder="Contoh: bagaimana mangrove menyimpan karbon?"><button class="go" type="submit">Tanya</button></div>
+<p class="note">Jawaban hanya disusun dari dokumen di pustaka ini dan dapat keliru. Periksa rujukan aslinya.</p>
+</form>
+
+<div id="out" aria-live="polite"></div>
+</main>
+<script>
+const $=(i)=>document.getElementById(i);
+const esc=(s)=>String(s??'').replace(/[&<>"']/g,(c)=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const safe=(u)=>/^https?:\/\//i.test(u||'')?u:(/^10\./.test(u||'')?'https://doi.org/'+u:'');
+function mode(m){const c=m==='cari';$('fCari').hidden=!c;$('fTanya').hidden=c;$('tCari').setAttribute('aria-pressed',c);$('tTanya').setAttribute('aria-pressed',!c);$('out').innerHTML='';}
+$('tCari').onclick=()=>mode('cari');$('tTanya').onclick=()=>mode('tanya');
+function item(d){const u=safe(d.oa_url||d.landing_url||d.tautan||d.doi);const oa=d.akses_terbuka||['gold','green','hybrid','diamond','bronze'].includes(d.oa_status);
+return `<div class="item"><h3>${u?`<a href="${esc(u)}" target="_blank" rel="noopener">${esc(d.title||d.judul)}</a>`:esc(d.title||d.judul)}</h3><div class="meta">${esc(d.venue||d.jurnal||'')} ${d.year||d.tahun?'· '+esc(d.year||d.tahun):''} ${oa?'· <span class="oa">Akses terbuka</span>':''}</div></div>`}
+function loading(){$('out').innerHTML='<div class="empty" style="color:#64746A">Memuat…</div>';}
+$('fCari').onsubmit=async(e)=>{e.preventDefault();const q=$('q').value.trim();if(!q){$('q').focus();return}loading();
+try{const r=await fetch('/api/cari?q='+encodeURIComponent(q)+($('oa').checked?'&oa=1':''));const j=await r.json();
+$('out').innerHTML=j.hasil&&j.hasil.length?`<div class="list">${j.hasil.map(item).join('')}</div>`:`<div class="list"><div class="empty"><strong>Tidak ada hasil untuk "${esc(q)}"</strong><p class="meta">Coba kata kunci yang lebih umum, atau hapus filter akses terbuka.</p></div></div>`;}
+catch{$('out').innerHTML='<div class="empty">Pencarian gagal. Coba lagi sebentar lagi.</div>'}};
+$('fTanya').onsubmit=async(e)=>{e.preventDefault();const t=$('t').value.trim();if(!t){$('t').focus();return}loading();
+try{const r=await fetch('/api/tanya',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({pertanyaan:t})});const j=await r.json();
+if(j.galat){$('out').innerHTML=`<div class="ans">${esc(j.galat)}</div>`;return}
+const head=j.jawaban?`<p style="margin:0">${esc(j.jawaban)}</p>`:`<p style="margin:0">${esc(j.pesan)}</p>`;
+$('out').innerHTML=`<div class="ans">${head}<p class="note">Jawaban AI dapat keliru. Periksa rujukan.</p></div>${j.rujukan&&j.rujukan.length?`<div class="list">${j.rujukan.map((d)=>item(d).replace('<h3>','<h3>['+d.no+'] ')).join('')}</div>`:''}`;}
+catch{$('out').innerHTML='<div class="empty">Asisten tidak dapat dijangkau. Coba lagi sebentar lagi.</div>'}};
+</script>
+</body>
+</html>
