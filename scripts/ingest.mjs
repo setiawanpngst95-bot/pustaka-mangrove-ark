@@ -13,7 +13,7 @@ const QUERIES = [
   ['lamun', '"seagrass"'],
   ['karbon-biru', '"blue carbon"'],
   ['wisata-pesisir', '"coastal tourism"'],
-  ['biodiversitas-pesisir', '"coastal biodiversity"'],
+  ['biodiversitas-pesisir', '"coastal biodiversity" AND (mangrove OR "coral reef" OR seagrass)'],
 ];
 const FIELDS = 'id,doi,title,publication_year,language,type,primary_location,open_access,topics,abstract_inverted_index,authorships';
 
@@ -77,7 +77,7 @@ async function main() {
       for (let page = 0; page < MAX_PAGES && cursor; page++) {
         const url = new URL('https://api.openalex.org/works');
         url.searchParams.set('search.title_and_abstract', term);
-        url.searchParams.set('filter', `from_publication_date:${since}`);
+        url.searchParams.set('filter', `from_publication_date:${since},type:article|review|book|book-chapter|report|dissertation`);
         url.searchParams.set('select', FIELDS);
         url.searchParams.set('per_page', '100');
         url.searchParams.set('cursor', cursor);
