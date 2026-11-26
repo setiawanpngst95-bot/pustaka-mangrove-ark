@@ -1,0 +1,23 @@
+name: Ambil katalog data resmi
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Uji saja tanpa menyimpan (1 = ya, 0 = simpan)'
+        default: '1'
+  schedule:
+    - cron: '0 20 * * *'
+jobs:
+  ambil:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: node scripts/ingest-resmi.mjs
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run || '0' }}
